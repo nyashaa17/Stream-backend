@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  zimkickoff-streams:
+    build: .
+    container_name: zimkickoff-streams
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.zimkickoff-streams.rule=Host(`streams-api.zimkickoff.co.zw`)"
+      - "traefik.http.routers.zimkickoff-streams.entrypoints=websecure"
+      - "traefik.http.routers.zimkickoff-streams.tls=true"
+      - "traefik.http.routers.zimkickoff-streams.tls.certresolver=letsencrypt"
+      - "traefik.http.services.zimkickoff-streams.loadbalancer.server.port=3001"
+
+networks:
+  default:
+    external: true
+    name: coolify
